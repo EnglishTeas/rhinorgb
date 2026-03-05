@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Minecraft RGB Generator</title>
+
+<style>
+
+body{
+font-family: Arial;
+background:#0f172a;
+color:white;
+text-align:center;
+padding:40px;
+}
+
+.container{
+max-width:700px;
+margin:auto;
+background:#1e293b;
+padding:30px;
+border-radius:10px;
+}
+
+input[type=text]{
+width:100%;
+padding:10px;
+font-size:18px;
+margin-bottom:20px;
+border-radius:6px;
+border:none;
+}
+
+.colorRow{
+display:flex;
+gap:10px;
+margin-bottom:10px;
+}
+
+button{
+padding:10px 14px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+.add{
+background:#22c55e;
+color:white;
+}
+
+.remove{
+background:#ef4444;
+color:white;
+}
+
+#output{
+margin-top:20px;
+background:#020617;
+padding:20px;
+border-radius:8px;
+word-break:break-all;
+}
+
+.preview{
+font-size:28px;
+margin-top:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Minecraft RGB Generator</h1>
+
+<input id="text" placeholder="Enter text">
+
+<div id="colors"></div>
+
+<button class="add" onclick="addColor()">Add Colour</button>
+
+<div class="preview" id="preview"></div>
+
+<div id="output"></div>
+
+<button onclick="copy()">Copy Output</button>
+
+</div>
+
+<script>
+
+let lastOutput=""
+
+function addColor(hex="#ff0000"){
+
+const row=document.createElement("div")
+row.className="colorRow"
+
+row.innerHTML=`
+<input type="color" value="${hex}" oninput="generate()">
+<button class="remove" onclick="removeColor(this)">X</button>
+`
+
+document.getElementById("colors").appendChild(row)
+
+generate()
+}
+
+function removeColor(btn){
+
+btn.parentElement.remove()
+
+generate()
+}
+
+async function generate(){
+
+const text=document.getElementById("text").value
+
+const pickers=[...document.querySelectorAll("#colors input")]
+
+if(text=="" || pickers.length<2)return
+
+let url="https://www.birdflop.com/api/v2/rgb?text="+encodeURIComponent(text)
+
+pickers.forEach(p=>{
+url+=`&colors[]=${p.value}`
+})
+
+const res=await fetch(url)
+const data=await res.json()
+
+lastOutput=data.output
+
+document.getElementById("output").textContent=lastOutput
+
+renderPreview(text,pickers)
+
+}
+
+function renderPreview(text,pickers){
+
+if(text==="")return
+
+let gradient="linear-gradient(90deg,"
+
+pickers.forEach((p,i)=>{
+gradient+=p.value
+if(i<pickers.length-1)gradient+=","
+})
+
+gradient+=")"
+
+const preview=document.getElementById("preview")
+
+preview.textContent=text
+preview.style.background=gradient
+preview.style.webkitBackgroundClip="text"
+preview.style.color="transparent"
+}
+
+function copy(){
+
+navigator.clipboard.writeText(lastOutput)
+
+}
+
+document.getElementById("text").addEventListener("input",generate)
+
+addColor("#ff0000")
+addColor("#0000ff")
+
+</script>
+
+</body>
+</html>
