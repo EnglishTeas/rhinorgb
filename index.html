@@ -110,9 +110,7 @@ generate()
 }
 
 function removeColor(btn){
-
 btn.parentElement.remove()
-
 generate()
 }
 
@@ -137,35 +135,36 @@ lastOutput=data.output
 
 document.getElementById("output").textContent=lastOutput
 
-renderPreview(text,pickers)
+renderPreview(lastOutput)
 
 }
 
-function renderPreview(text,pickers){
-
-if(text==="")return
-
-let gradient="linear-gradient(90deg,"
-
-pickers.forEach((p,i)=>{
-gradient+=p.value
-if(i<pickers.length-1)gradient+=","
-})
-
-gradient+=")"
+function renderPreview(formatted){
 
 const preview=document.getElementById("preview")
+preview.innerHTML=""
 
-preview.textContent=text
-preview.style.background=gradient
-preview.style.webkitBackgroundClip="text"
-preview.style.color="transparent"
+const regex=/&#([0-9a-fA-F]{6})(.)/g
+
+let match
+
+while((match=regex.exec(formatted))!==null){
+
+const color=match[1]
+const char=match[2]
+
+const span=document.createElement("span")
+span.style.color="#"+color
+span.textContent=char
+
+preview.appendChild(span)
+
+}
+
 }
 
 function copy(){
-
 navigator.clipboard.writeText(lastOutput)
-
 }
 
 document.getElementById("text").addEventListener("input",generate)
